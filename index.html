@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>La Grama Deportyx · Catálogo</title>
+<meta name="description" content="Catálogo de La Grama Deportyx, tienda deportiva en Mariquita, Tolima. Guayos, zapatillas, camisetas y accesorios con pedidos por WhatsApp.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<section class="field">
+  <div class="wrap">
+    <div class="eyebrow">Tienda deportiva · Mariquita, Tolima</div>
+    <h1>La Grama <span>Deportyx</span></h1>
+    <p class="lede">Guayos, zapatillas de micro, camisetas de selección y de club. Escoge tu talla, arma el pedido y lo mandas por WhatsApp.</p>
+    <div class="facts">
+      <span><b>●</b> Punto físico en Mariquita</span>
+      <span><b>●</b> Atención también en Manizales</span>
+      <span><b>●</b> Pedidos por WhatsApp</span>
+    </div>
+  </div>
+</section>
+
+<nav class="bar" aria-label="Filtros del catálogo">
+  <div class="wrap">
+    <div class="chips" id="chips" role="group" aria-label="Categorías"></div>
+    <input class="search" id="q" type="search" placeholder="Buscar: Joma, Colombia, retro…" aria-label="Buscar producto">
+  </div>
+</nav>
+
+<main class="wrap">
+  <p class="note">Productos y precios de muestra, tomados del Instagram de la tienda. Se reemplazan con los del catálogo de Drive.</p>
+  <div class="count" id="count"></div>
+  <div class="grid" id="grid"></div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>La Grama Deportyx · Mariquita, Tolima</span>
+    <span>Instagram: @lagrama_deportyx</span>
+    <span>WhatsApp: 310 318 8185 · 312 402 0874</span>
+  </div>
+</footer>
+
+<button class="bag-btn" id="bagBtn" type="button">Mi pedido <span class="n" id="bagN">0</span></button>
+
+<div class="panel" id="panel" hidden>
+  <aside class="sheet" role="dialog" aria-modal="true" aria-labelledby="bagTitle">
+    <header><h2 id="bagTitle">Tu pedido</h2><button class="x" id="close" type="button" aria-label="Cerrar">×</button></header>
+    <div class="items" id="items"></div>
+    <div class="total"><span>Total</span><span id="total">$0</span></div>
+    <label for="cname">Tu nombre</label>
+    <input id="cname" type="text" placeholder="Ej. Camilo Rojas" autocomplete="name">
+    <label for="cmode">Entrega</label>
+    <input id="cmode" type="text" placeholder="Recojo en tienda / domicilio en Mariquita / envío">
+    <a class="wa" id="wa" href="#" target="_blank" rel="noopener" aria-disabled="true">Enviar pedido por WhatsApp</a>
+    <p class="fine">Si el botón no abre WhatsApp, escribe al <b>310 318 8185</b> y pega tu pedido.</p>
+  </aside>
+</div>
+
+<script src="js/productos.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
