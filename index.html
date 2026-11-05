@@ -15,7 +15,7 @@
   <div class="wrap">
     <div class="eyebrow">Tienda deportiva · Mariquita, Tolima</div>
     <h1>La Grama <span>Deportyx</span></h1>
-    <p class="lede">Guayos, zapatillas de micro, camisetas de selección y de club. Escoge tu talla, arma el pedido y lo mandas por WhatsApp.</p>
+    <p class="lede">Guayos, zapatillas de futsal, camisetas de club y selección, retro, uniformes, sudaderas y morrales. Escoge tu talla, arma el pedido y lo mandas por WhatsApp.</p>
     <div class="facts">
       <span><b>●</b> Punto físico en Mariquita</span>
       <span><b>●</b> Atención también en Manizales</span>
@@ -27,14 +27,16 @@
 <nav class="bar" aria-label="Filtros del catálogo">
   <div class="wrap">
     <div class="chips" id="chips" role="group" aria-label="Categorías"></div>
-    <input class="search" id="q" type="search" placeholder="Buscar: Joma, Colombia, retro…" aria-label="Buscar producto">
+    <input class="search" id="q" type="search" placeholder="Buscar: Lakers, Millonarios, Mercurial…" aria-label="Buscar producto">
   </div>
+  <div class="wrap"><div class="subs" id="subs" role="group" aria-label="Subcategorías" hidden></div></div>
 </nav>
 
 <main class="wrap">
-  <p class="note">Productos y precios de muestra, tomados del Instagram de la tienda. Se reemplazan con los del catálogo de Drive.</p>
+  <p class="note">Los precios y la disponibilidad se confirman por WhatsApp al enviar tu pedido.</p>
   <div class="count" id="count"></div>
   <div class="grid" id="grid"></div>
+  <button class="more" id="more" type="button" hidden>Ver más</button>
 </main>
 
 <footer>
@@ -51,11 +53,17 @@
   <aside class="sheet" role="dialog" aria-modal="true" aria-labelledby="bagTitle">
     <header><h2 id="bagTitle">Tu pedido</h2><button class="x" id="close" type="button" aria-label="Cerrar">×</button></header>
     <div class="items" id="items"></div>
-    <div class="total"><span>Total</span><span id="total">$0</span></div>
+    <div class="total" id="totalRow" hidden><span>Total</span><span id="total">$0</span></div>
     <label for="cname">Tu nombre</label>
-    <input id="cname" type="text" placeholder="Ej. Camilo Rojas" autocomplete="name">
+    <input id="cname" type="text" placeholder="Tu nombre" autocomplete="name">
     <label for="cmode">Entrega</label>
-    <input id="cmode" type="text" placeholder="Recojo en tienda / domicilio en Mariquita / envío">
+    <select id="cmode">
+      <option value="">Escoge cómo quieres recibirlo</option>
+      <option value="Recoger en la tienda (Mariquita)">Recoger en la tienda (Mariquita)</option>
+      <option value="Domicilio en Mariquita">Domicilio en Mariquita</option>
+      <option value="Envío a otra ciudad">Envío a otra ciudad</option>
+    </select>
+    <p class="hint">Los detalles de la entrega (dirección, costo y fecha) se acuerdan por WhatsApp.</p>
     <a class="wa" id="wa" href="#" target="_blank" rel="noopener" aria-disabled="true">Enviar pedido por WhatsApp</a>
     <p class="fine">Si el botón no abre WhatsApp, escribe al <b>310 318 8185</b> y pega tu pedido.</p>
   </aside>

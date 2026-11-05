@@ -1,67 +1,107 @@
-const PHONE = "573103188185";
-const ICON = {
-  shoe:'<svg viewBox="0 0 64 40" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"><path d="M4 30V14l10-2 6 6 10 2 16 4c8 2 12 5 12 8v4H6Z" fill="currentColor" fill-opacity=".18"/><path d="M4 30h56M18 36v-2M30 36v-2M42 36v-2M54 36v-2"/></svg>',
-  shirt:'<svg viewBox="0 0 64 56" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"><path d="M22 4 6 12l6 14 6-3v29h28V23l6 3 6-14L42 4c-2 5-6 7-10 7s-8-2-10-7Z" fill="currentColor" fill-opacity=".18"/></svg>',
-  ball:'<svg viewBox="0 0 56 56" fill="none" stroke="currentColor" stroke-width="3"><circle cx="28" cy="28" r="24" fill="currentColor" fill-opacity=".18"/><path d="m28 17 10 7-4 12H22l-4-12Z"/><path d="M28 4v13M48 18l-10 6M42 48l-8-12M14 48l8-12M8 18l10 6"/></svg>'
-};
-const CATS = ["Todo","Calzado","Colombia","Tolima","Destacada","Retro","Accesorios"];
+const PHONE = "573212214507";
+const PAGE = 36;
 const fmt = v => "$" + v.toLocaleString("es-CO");
-let cat = "Todo", q = "", pick = {}, bag = [];
-try { bag = JSON.parse(localStorage.getItem("lagrama-bag")) || []; } catch(e) {}
-const save = () => { try { localStorage.setItem("lagrama-bag", JSON.stringify(bag)); } catch(e) {} };
+const norm = s => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
 const $ = id => document.getElementById(id);
 
-function chips(){
-  $("chips").innerHTML = CATS.map(c => `<button class="chip" type="button" aria-pressed="${c===cat}" data-c="${c}">${c}</button>`).join("");
+let cat = "Todo", sub = "", q = "", shown = PAGE, pick = {}, photo = {}, bag = [];
+try { bag = JSON.parse(localStorage.getItem("lagrama-bag")) || []; } catch (e) {}
+const save = () => { try { localStorage.setItem("lagrama-bag", JSON.stringify(bag)); } catch (e) {} };
+
+const count = c => P.filter(p => p.c === c).length;
+const subsOf = c => [...new Set(P.filter(p => p.c === c && p.sub).map(p => p.sub))];
+const subLabel = s => s.replace(/ \/ /g, " · ").replace("Niñ@", "Niños");
+
+function chips() {
+  $("chips").innerHTML = ["Todo", ...CATEGORIAS].map(c =>
+    `<button class="chip" type="button" aria-pressed="${c === cat}" data-c="${c}">${c}${c !== "Todo" ? ` <small>${count(c)}</small>` : ""}</button>`
+  ).join("");
+  const subs = cat === "Todo" ? [] : subsOf(cat);
+  $("subs").hidden = subs.length < 2;
+  $("subs").innerHTML = ["", ...subs].map(s =>
+    `<button class="sub" type="button" aria-pressed="${s === sub}" data-s="${s}">${s ? subLabel(s) : "Todas"}</button>`
+  ).join("");
 }
-function grid(){
-  const norm = s => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
-  const list = P.filter(p => (cat==="Todo"||p.c===cat) && norm(p.n+" "+p.s+" "+p.c).includes(norm(q)));
-  $("count").textContent = list.length + (list.length===1?" producto":" productos");
-  $("grid").innerHTML = list.length ? list.map(p => `
-    <article class="card">
-      <div class="pic" style="--tint:${p.t}">${ICON[p.i]}<span class="tag">${p.c}</span></div>
-      <div class="body">
-        <h3 class="name">${p.n}</h3>
-        <p class="meta">${p.s}</p>
-        <div class="price">${fmt(p.p)}</div>
-        <div class="sizes" role="group" aria-label="Talla">${p.z.map(z=>`<button class="size" type="button" data-p="${p.id}" data-z="${z}" aria-pressed="${pick[p.id]===z}">${z}</button>`).join("")}</div>
-        <button class="add" type="button" data-add="${p.id}" ${pick[p.id]||p.z.length===1?"":"disabled"}>${pick[p.id]||p.z.length===1?"Agregar al pedido":"Escoge talla"}</button>
-      </div>
-    </article>`).join("") : `<p class="empty">No hay productos con esa búsqueda.</p>`;
+
+function list() {
+  const nq = norm(q);
+  return P.filter(p =>
+    (cat === "Todo" || p.c === cat) &&
+    (!sub || p.sub === sub) &&
+    (!nq || norm(`${p.n} ${p.c} ${p.sub}`).includes(nq))
+  );
 }
-function renderBag(){
-  const n = bag.reduce((a,b)=>a+b.q,0), tot = bag.reduce((a,b)=>a+b.q*b.p,0);
+
+function card(p) {
+  const i = photo[p.id] || 0, one = p.z.length === 0;
+  const ready = one || pick[p.id];
+  return `<article class="card">
+    <div class="pic">
+      <img src="${p.img[i]}" alt="${p.n}" loading="lazy" decoding="async">
+      <span class="tag">${p.sub ? subLabel(p.sub) : p.c}</span>
+      ${p.img.length > 1 ? `<div class="dots">${p.img.map((_, k) => `<button type="button" class="dot" data-ph="${p.id}" data-k="${k}" aria-label="Foto ${k + 1}" aria-pressed="${k === i}"></button>`).join("")}</div>` : ""}
+    </div>
+    <div class="body">
+      <h3 class="name">${p.n}</h3>
+      <div class="price">${p.p ? fmt(p.p) : '<span class="ask">Precio por WhatsApp</span>'}</div>
+      ${p.z.length ? `<div class="sizes" role="group" aria-label="Talla">${p.z.map(z => `<button class="size" type="button" data-p="${p.id}" data-z="${z}" aria-pressed="${pick[p.id] === z}">${z}</button>`).join("")}</div>` : ""}
+      <button class="add" type="button" data-add="${p.id}" ${ready ? "" : "disabled"}>${ready ? "Agregar al pedido" : "Escoge talla"}</button>
+    </div>
+  </article>`;
+}
+
+function grid() {
+  const l = list();
+  $("count").textContent = `${l.length} ${l.length === 1 ? "producto" : "productos"}`;
+  $("grid").innerHTML = l.length ? l.slice(0, shown).map(card).join("") : `<p class="empty">No hay productos con esa búsqueda.</p>`;
+  $("more").hidden = l.length <= shown;
+  $("more").textContent = `Ver más (${l.length - shown} restantes)`;
+}
+
+function renderBag() {
+  const n = bag.reduce((a, b) => a + b.q, 0);
+  const priced = bag.every(b => b.p), tot = bag.reduce((a, b) => a + b.q * (b.p || 0), 0);
   $("bagN").textContent = n;
+  $("totalRow").hidden = !(bag.length && priced);
   $("total").textContent = fmt(tot);
-  $("items").innerHTML = bag.length ? bag.map((b,k)=>`
-    <div class="item"><div class="t">${b.n}<div class="s">Talla ${b.z} · ${fmt(b.p)}</div></div>
-    <div class="qty"><button type="button" data-d="${k}" aria-label="Quitar uno">−</button>${b.q}<button type="button" data-i="${k}" aria-label="Agregar uno">+</button></div></div>`).join("")
-    : `<p class="empty">Todavía no has agregado nada.</p>`;
+  $("items").innerHTML = bag.length ? bag.map((b, k) => `
+    <div class="item">
+      <img src="${b.img}" alt="" loading="lazy">
+      <div class="t">${b.n}<div class="s">${b.z ? "Talla " + b.z : "Sin talla"}${b.p ? " · " + fmt(b.p) : ""}</div></div>
+      <div class="qty"><button type="button" data-d="${k}" aria-label="Quitar uno">−</button>${b.q}<button type="button" data-i="${k}" aria-label="Agregar uno">+</button></div>
+    </div>`).join("") : `<p class="empty">Todavía no has agregado nada.</p>`;
   const name = $("cname").value.trim(), mode = $("cmode").value.trim();
-  const msg = "Hola La Grama, quiero hacer este pedido:\n" + bag.map(b=>`• ${b.q} x ${b.n} (talla ${b.z}) – ${fmt(b.p*b.q)}`).join("\n")
-    + `\nTotal: ${fmt(tot)}` + (name?`\nNombre: ${name}`:"") + (mode?`\nEntrega: ${mode}`:"");
+  const msg = "Hola La Grama, quiero hacer este pedido:\n" +
+    bag.map(b => `• ${b.q} x ${b.n}${b.z ? ` (talla ${b.z})` : ""} [ref. ${b.id}]`).join("\n") +
+    (priced && bag.length ? `\nTotal: ${fmt(tot)}` : "\n¿Me confirman precio y disponibilidad?") +
+    (name ? `\nNombre: ${name}` : "") + (mode ? `\nEntrega: ${mode}` : "");
   $("wa").href = "https://wa.me/" + PHONE + "?text=" + encodeURIComponent(msg);
   $("wa").setAttribute("aria-disabled", bag.length ? "false" : "true");
   save();
 }
+
 document.addEventListener("click", e => {
-  const t = e.target.closest("button"); if(!t) return;
-  if(t.dataset.c){ cat = t.dataset.c; chips(); grid(); }
-  else if(t.dataset.z){ pick[t.dataset.p] = t.dataset.z; grid(); }
-  else if(t.dataset.add){
-    const p = P.find(x=>x.id==t.dataset.add), z = pick[p.id] || p.z[0];
-    const ex = bag.find(b=>b.id===p.id && b.z===z);
-    ex ? ex.q++ : bag.push({id:p.id,n:p.n,p:p.p,z,q:1});
+  const t = e.target.closest("button"); if (!t) return;
+  const d = t.dataset;
+  if (d.c) { cat = d.c; sub = ""; shown = PAGE; chips(); grid(); }
+  else if (d.s !== undefined) { sub = d.s; shown = PAGE; chips(); grid(); }
+  else if (d.ph) { photo[d.ph] = +d.k; grid(); }
+  else if (d.z) { pick[d.p] = d.z; grid(); }
+  else if (d.add) {
+    const p = P.find(x => x.id == d.add), z = pick[p.id] || "";
+    const ex = bag.find(b => b.id === p.id && b.z === z);
+    ex ? ex.q++ : bag.push({ id: p.id, n: p.n, p: p.p, z, img: p.img[0], q: 1 });
     renderBag(); t.textContent = "Agregado ✓"; setTimeout(grid, 900);
   }
-  else if(t.dataset.i){ bag[t.dataset.i].q++; renderBag(); }
-  else if(t.dataset.d){ const b = bag[t.dataset.d]; b.q--; if(!b.q) bag.splice(t.dataset.d,1); renderBag(); }
+  else if (d.i) { bag[d.i].q++; renderBag(); }
+  else if (d.d) { const b = bag[d.d]; b.q--; if (!b.q) bag.splice(d.d, 1); renderBag(); }
 });
-$("q").addEventListener("input", e => { q = e.target.value; grid(); });
+$("more").onclick = () => { shown += PAGE; grid(); };
+$("q").addEventListener("input", e => { q = e.target.value; shown = PAGE; grid(); });
 $("bagBtn").onclick = () => { $("panel").hidden = false; $("close").focus(); };
 $("close").onclick = () => $("panel").hidden = true;
-$("panel").addEventListener("click", e => { if(e.target.id==="panel") $("panel").hidden = true; });
-document.addEventListener("keydown", e => { if(e.key==="Escape") $("panel").hidden = true; });
-["cname","cmode"].forEach(id => $(id).addEventListener("input", renderBag));
+$("panel").addEventListener("click", e => { if (e.target.id === "panel") $("panel").hidden = true; });
+document.addEventListener("keydown", e => { if (e.key === "Escape") $("panel").hidden = true; });
+$("cname").addEventListener("input", renderBag);
+$("cmode").addEventListener("change", renderBag);
 chips(); grid(); renderBag();
